@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .calendar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .month {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 250px;
+        }
+        .month h3 {
+            text-align: center;
+        }
+        .day {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dynamic Calendar Generator</h1>
+    <label for="yearInput">Enter Year:</label>
+    <input type="number" id="yearInput" placeholder="e.g., 2024" />
+    <button onclick="generateCalendar()">Generate Calendar</button>
+
+    <div id="calendar" class="calendar"></div>
+
+    <script>
+        async function generateCalendar() {
+            const year = document.getElementById("yearInput").value;
+            if (!year) {
+                alert("Please enter a year");
+                return;
+            }
+
+            const calendarContainer = document.getElementById("calendar");
+            calendarContainer.innerHTML = ""; // Clear previous content
+
+            try {
+                const response = await fetch(`http://localhost:8080/year/months?year=${year}`);
+                const data = await response.json();
+		console.log(data);
+
+                // Iterate over the months in the response
+                Object.keys(data).forEach(monthKey => {
+                    const monthDiv = document.createElement("div");
+                    monthDiv.className = "month";
+
+                    const monthHeader = document.createElement("h3");
+                    monthHeader.textContent = monthKey;
+                    monthDiv.appendChild(monthHeader);
+
+                    // Iterate over the days in the current month
+                    data[monthKey].forEach(day => {
+                        const dayDiv = document.createElement("div");
+                        dayDiv.className = "day";
+                        dayDiv.textContent = `Day ${day.day}: ${day.name}`;
+                        monthDiv.appendChild(dayDiv);
+                    });
+
+                    calendarContainer.appendChild(monthDiv);
+                });
+            } catch (error) {
+                console.error("Error generating calendar:", error);
+                alert("Failed to fetch calendar data.");
+            }
+        }
+    </script>
+</body>
+</html>
